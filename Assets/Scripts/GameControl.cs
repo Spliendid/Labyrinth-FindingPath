@@ -75,17 +75,19 @@ public class GameControl : MonoBehaviour
 
     private void FindingPath()
     {
-        pf = new BFS(Map,start,end);
-        if (pf.Finding())
-        {
-            Debug.Log("Finding success");
-            ShowPath();
-        }
-        else
-        {
-            Debug.Log("Finding Faild");
-        }
-
+        var pf = new BFS(Map,start,end);
+        pf.mono = this;
+        pf.IE_Finding();
+        //if (pf.Finding())
+        //{
+        //    Debug.Log("Finding success");
+        //    ShowPath();
+        //}
+        //else
+        //{
+        //    Debug.Log("Finding Faild");
+        //}
+     
 
     }
 

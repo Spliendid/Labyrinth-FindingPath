@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading;
+using System.Collections;
 using UnityEngine;
  class BFS : PathFind
  {
@@ -13,12 +13,56 @@ using UnityEngine;
          return FindingPath(start,end);
      }
 
-    private bool FindingPath(LinkE s,LinkE e)
+    public MonoBehaviour mono;
+    private bool isFindPass = false;
+
+    public void IE_Finding()
     {
+        mono.StartCoroutine(IE_finding( start,end));
+    }
+
+    private IEnumerator IE_finding(LinkE s,LinkE e)
+    {
+
+        if (isFindPass)
+        {
+            yield break;
+        }
+
+        yield return new WaitForSeconds(0.2f);
         LinkE linkE = null;
         Map[s.R, s.C] = false; //设为已走过
         GameObject gameobject = GameObject.Instantiate(GameControl._Instance.cube_green);
         gameobject.transform.position = new Vector3(GetX(s.C), 0, GetZ(s.R));
+
+        
+
+        if (s.CompareTo(e))
+        {
+            isFindPass = true;
+            yield break;
+        }
+
+        while ((linkE = GetNextE(s)) != null)
+        {
+           yield return mono.StartCoroutine(IE_finding(linkE, e));
+            if (isFindPass)
+            {
+                s.Next = linkE;
+                yield break;
+            }
+
+        }
+        GameObject.Destroy(gameobject);
+
+        yield return null;
+    }
+
+    private bool FindingPath(LinkE s,LinkE e)
+    {
+        LinkE linkE = null;
+        Map[s.R, s.C] = false; //设为已走过
+    
 
         if (s .CompareTo(e))
         {
@@ -33,10 +77,7 @@ using UnityEngine;
                 s.Next = linkE;
                 return true;
             }
-            else
-            {
-                GameObject.Destroy(gameobject);
-            }
+          
         }
 
         return false;
@@ -47,7 +88,6 @@ using UnityEngine;
     //顺时针，从上开始
     private LinkE GetNextE(LinkE s)
     {
-        Thread.Sleep(50);
         Debug.Log("Thread.Sleep");
         LinkE e = null;
         if ( s.R - 1>=0&&Map[s.R-1,s.C])
