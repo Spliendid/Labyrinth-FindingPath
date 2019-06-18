@@ -3,6 +3,9 @@ using System.IO;
 using System.Threading;
 public class GameControl : MonoBehaviour
 {
+    public E_PathFind E_PF;
+    public E_FindingType E_FT;
+    public float FindDeltT = 0.2f;
     public GameObject cube;
     public GameObject cube_red;
     public GameObject cube_green;
@@ -75,31 +78,59 @@ public class GameControl : MonoBehaviour
 
     private void FindingPath()
     {
-        var pf = new BFS(Map,start,end);
-        pf.mono = this;
-        pf.IE_Finding();
-        //if (pf.Finding())
-        //{
-        //    Debug.Log("Finding success");
-        //    ShowPath();
-        //}
-        //else
-        //{
-        //    Debug.Log("Finding Faild");
-        //}
-     
+
+        switch (E_PF)
+        {
+            case E_PathFind.DFS:
+
+                 pf = new DFS(Map,start,end);
+
+              
+                break;
+            case E_PathFind.DFS_Stack:
+                pf = new DFS_Stack(Map,start,end);
+                break;
+            case E_PathFind.BFS:
+                pf = new BFS_Queue(Map, start, end);
+                break;
+            case E_PathFind.AStar:
+                pf = new AStar(Map, start, end);
+                break;
+            case E_PathFind.BStar:
+                break;
+            case E_PathFind.Dijkstra:
+                break;
+            default:
+                break;
+        }
+
+        if (E_FT == E_FindingType.Gradually)
+        {
+            pf.mono = this;
+            pf.FindDeltT = FindDeltT;
+            pf.IE_Finding();
+        }
+        else if (E_FT == E_FindingType.Instant)
+        {
+            if (pf.Finding())
+            {
+                Debug.Log("<color=red>Find path success.</color>");
+                pf.ShowPath(ShowPath);
+            }
+            else
+            {
+                Debug.Log("<color=red>Find path faile.</color>");
+            }
+        }
+       
+
 
     }
 
-    private void ShowPath()
+    public void ShowPath(LinkE e)
     {
-        LinkE current = new LinkE(start);
-        while (current.Next!=null)
-        {
             GameObject go = GameObject.Instantiate(cube_red);
-            go.transform.position = new Vector3(GetX(current.Next.C),0,GetZ(current.Next.R));
-            current = current.Next;
-        }
+            go.transform.position = new Vector3(GetX(e.C),0,GetZ(e.R));        
     }
 
 
@@ -115,9 +146,11 @@ public class GameControl : MonoBehaviour
         return halfR - r;
     }
 
-    private void UpdateFind(GameObject go,LinkE linkE ,bool bo)
+    public GameObject UpdateFind(LinkE e )
     {
-
+        GameObject go = GameObject.Instantiate(cube_green);
+        go.transform.position = new Vector3(GetX(e.C), 0, GetZ(e.R));
+        return go;
     }
 
 }
@@ -130,6 +163,9 @@ public class LinkE
     public int C;//列数
     public int R;//行数
     public LinkE Next = null;
+    public LinkE Pre = null;
+
+    public GameObject go;
 
     public LinkE() { }
 
@@ -137,17 +173,42 @@ public class LinkE
     {
         this.R = r;
         this.C = c;
-        this.Next = null;
     }
 
-    public LinkE(LinkE next)
+
+    public LinkE(LinkE e,bool isNext = true)
     {
-        this.Next = next;
+        if (isNext)
+            this.Next = e;
+        else
+            this.Pre = e;
     }
 
-    public bool CompareTo(LinkE otherE)
+    public bool EqualTo(LinkE otherE)
     {
         return this.R == otherE.R && this.C == otherE.C ;
     }
+
+    public override string ToString()
+    {
+        return $"R:{R}  C:{C}";
+    }
 }
 #endregion
+
+public enum E_PathFind
+{
+    DFS =1,
+    DFS_Stack =2,
+    BFS = 3,
+    AStar = 4,
+    BStar = 5,
+    Dijkstra = 6,
+    SPFA = 7,
+}
+
+public enum E_FindingType
+{
+    Instant = 1,
+    Gradually = 2,
+}

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
- class BFS : PathFind
+ class DFS : PathFind
  {
-     public BFS(bool[,] map, LinkE s,LinkE e) : base(map,s, e)
+     public DFS(bool[,] map, LinkE s,LinkE e) : base(map,s, e)
      {
 
      }
@@ -13,10 +13,8 @@ using UnityEngine;
          return FindingPath(start,end);
      }
 
-    public MonoBehaviour mono;
-    private bool isFindPass = false;
 
-    public void IE_Finding()
+    public override void IE_Finding()
     {
         mono.StartCoroutine(IE_finding( start,end));
     }
@@ -29,7 +27,7 @@ using UnityEngine;
             yield break;
         }
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(FindDeltT);
         LinkE linkE = null;
         Map[s.R, s.C] = false; //设为已走过
         GameObject gameobject = GameObject.Instantiate(GameControl._Instance.cube_green);
@@ -37,7 +35,7 @@ using UnityEngine;
 
         
 
-        if (s.CompareTo(e))
+        if (s.EqualTo(e))
         {
             isFindPass = true;
             yield break;
@@ -64,7 +62,7 @@ using UnityEngine;
         Map[s.R, s.C] = false; //设为已走过
     
 
-        if (s .CompareTo(e))
+        if (s .EqualTo(e))
         {
             return true;
         }
@@ -86,9 +84,8 @@ using UnityEngine;
     }
 
     //顺时针，从上开始
-    private LinkE GetNextE(LinkE s)
+    protected override LinkE GetNextE(LinkE s)
     {
-        Debug.Log("Thread.Sleep");
         LinkE e = null;
         if ( s.R - 1>=0&&Map[s.R-1,s.C])
         {
@@ -112,16 +109,14 @@ using UnityEngine;
         return e;
     }
 
-    private float GetX(int c)
+    public override void ShowPath(Action<LinkE> ac)
     {
-        float halfC = MapC / 2f;
-        return c - halfC;
-    }
-
-    private float GetZ(int r)
-    {
-        float halfR = MapR / 2f;
-        return halfR - r;
+        LinkE current = new LinkE(start);
+        while (current.Next!=null)
+        {
+            current = current.Next;
+            ac(current);
+        }
     }
 }
 
