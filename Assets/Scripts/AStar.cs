@@ -26,9 +26,15 @@ class AStar: PathFind
         MinHeap<LinkE> heap = new MinHeap<LinkE>();
         heap.Add(s);
         LinkE current;
+        int ii = 0;
         while (heap.Count > 0)
         {
-            current = heap.FindMin();
+            ii++;
+            if (ii>200)
+            {
+                break;
+            }
+            current = heap.ExtractMin();
             Debug.Log(current);
             Map[current.R, current.C] = false; //设为已走过
 
