@@ -93,6 +93,9 @@ public class GameControl : MonoBehaviour
             case E_PathFind.BFS:
                 pf = new BFS_Queue(Map, start, end);
                 break;
+            case E_PathFind.AStar_Stack:
+                pf = new AStar_Stack(Map, start, end);
+                break;
             case E_PathFind.AStar:
                 pf = new AStar(Map, start, end);
                 break;
@@ -156,59 +159,3 @@ public class GameControl : MonoBehaviour
 }
 
 
-#region 链表元素类
-
-public class LinkE
-{
-    public int C;//列数
-    public int R;//行数
-    public LinkE Next = null;
-    public LinkE Pre = null;
-
-    public GameObject go;
-
-    public LinkE() { }
-
-    public LinkE(int r,int c)
-    {
-        this.R = r;
-        this.C = c;
-    }
-
-
-    public LinkE(LinkE e,bool isNext = true)
-    {
-        if (isNext)
-            this.Next = e;
-        else
-            this.Pre = e;
-    }
-
-    public bool EqualTo(LinkE otherE)
-    {
-        return this.R == otherE.R && this.C == otherE.C ;
-    }
-
-    public override string ToString()
-    {
-        return $"R:{R}  C:{C}";
-    }
-}
-#endregion
-
-public enum E_PathFind
-{
-    DFS =1,
-    DFS_Stack =2,
-    BFS = 3,
-    AStar = 4,
-    BStar = 5,
-    Dijkstra = 6,
-    SPFA = 7,
-}
-
-public enum E_FindingType
-{
-    Instant = 1,
-    Gradually = 2,
-}

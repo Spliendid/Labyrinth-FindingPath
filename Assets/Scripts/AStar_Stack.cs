@@ -1,34 +1,32 @@
 ﻿/*
- * 优先队列实现AStar
+ * 假的AStar寻路，其实还是DFS
  */
 using System;
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
 
-class AStar: PathFind
+class AStar_Stack : PathFind
 {
-
-
-    public AStar(bool[,] map, LinkE s, LinkE e) : base(map, s, e)
+    public AStar_Stack(bool[,] map, LinkE s, LinkE e) : base(map, s, e)
     {
     }
 
     public override bool Finding()
     {
-        return Finding(start, end);
+        return Finding(start,end);
     }
 
-    private bool Finding(LinkE s, LinkE e)
+    private bool Finding(LinkE s,LinkE e)
     {
         bool bo = false;
 
-        MinHeap<LinkE> heap = new MinHeap<LinkE>();
-        heap.Add(s);
+        Stack<LinkE> stack = new Stack<LinkE>();
+        stack.Push(s);
         LinkE current;
-        while (heap.Count > 0)
+        while (stack.Count>0)
         {
-            current = heap.FindMin();
+            current = stack.Pop();
             Debug.Log(current);
             Map[current.R, current.C] = false; //设为已走过
 
@@ -39,15 +37,15 @@ class AStar: PathFind
             }
 
             List<LinkE> nextElements = GetNextElements(current);
-            if (nextElements.Count > 0)
+            if (nextElements.Count>0)
             {
                 for (int i = 0; i < nextElements.Count; i++)
                 {
                     nextElements[i].Pre = current;
-                    heap.Add(nextElements[i]);
+                    stack.Push(nextElements[i]);
                 }
             }
-
+            
         }
 
         return bo;
@@ -55,10 +53,10 @@ class AStar: PathFind
 
     public override void IE_Finding()
     {
-        mono.StartCoroutine(IE_finding(start, end));
+        mono.StartCoroutine(IE_finding(start,end));
     }
 
-    private IEnumerator IE_finding(LinkE s, LinkE e)
+    private IEnumerator IE_finding(LinkE s,LinkE e)
     {
         bool bo = false;
         GameObject gameobject = new GameObject();
@@ -94,8 +92,8 @@ class AStar: PathFind
             else
             {
                 //删除
-                LinkE temp = new LinkE(current, false);
-                while (temp.Pre != stack.Peek().Pre)
+                LinkE temp = new LinkE(current,false);
+                while (temp.Pre!=stack.Peek().Pre)
                 {
                     temp = temp.Pre;
                     GameObject.Destroy(temp.go);
@@ -123,7 +121,7 @@ class AStar: PathFind
         List<LinkE> list = new List<LinkE>();
         if (s.R - 1 >= 0 && Map[s.R - 1, s.C])
         {
-            list.Add(new LinkE(s.R - 1, s.C));
+            list.Add( new LinkE(s.R - 1, s.C));
         }
         if (s.C + 1 <= MapC - 1 && Map[s.R, s.C + 1])
         {
@@ -138,6 +136,8 @@ class AStar: PathFind
         {
             list.Add(new LinkE(s.R, s.C - 1));
         }
+
+        list.Sort((a,b)=>(GetF(b)-GetF(a)));
 
         return list;
     }
@@ -173,7 +173,7 @@ class AStar: PathFind
     private int GetF(LinkE e)
     {
         int G = 1;//从上一点移动到e的距离
-        int H = Math.Abs(e.C - end.C) + Math.Abs(e.R - end.R);
+        int H = Math.Abs(e.C - end.C) + Math.Abs(e.R-end.R);
         return G + H;
     }
 }
