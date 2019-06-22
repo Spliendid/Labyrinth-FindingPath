@@ -26,14 +26,8 @@ class AStar: PathFind
         MinHeap<LinkE> heap = new MinHeap<LinkE>();
         heap.Add(s);
         LinkE current;
-        int ii = 0;
         while (heap.Count > 0)
         {
-            ii++;
-            if (ii>200)
-            {
-                break;
-            }
             current = heap.ExtractMin();
             Debug.Log(current);
             Map[current.R, current.C] = false; //设为已走过
@@ -68,23 +62,33 @@ class AStar: PathFind
     {
         bool bo = false;
         GameObject gameobject = new GameObject();
-        Stack<LinkE> stack = new Stack<LinkE>();
-        stack.Push(s);
+        List<GameObject> gos = new List<GameObject>();
+        MinHeap<LinkE> heap = new MinHeap<LinkE>();
+        heap.Add(s);
         LinkE current;
-        while (stack.Count > 0)
+        while (heap.Count > 0)
         {
             yield return new WaitForSeconds(FindDeltT);
-            current = stack.Pop();
+            current = heap.ExtractMin();
             Debug.Log(current);
-
             gameobject = GameObject.Instantiate(GameControl._Instance.cube_green);
             gameobject.transform.position = new Vector3(GetX(current.C), 0, GetZ(current.R));
+            gos.Add(gameobject);
             current.go = gameobject;
             Map[current.R, current.C] = false; //设为已走过
 
             if (current.EqualTo(end))
             {
                 end.Pre = current.Pre;
+                //结束
+                foreach (var item in gos)
+                {
+                    GameObject.Destroy(item);
+                    yield return new WaitForEndOfFrame();
+                }
+
+                ShowPath(GameControl._Instance.ShowPath);
+
                 yield break;
             }
 
@@ -94,19 +98,10 @@ class AStar: PathFind
                 for (int i = 0; i < nextElements.Count; i++)
                 {
                     nextElements[i].Pre = current;
-                    stack.Push(nextElements[i]);
+                    heap.Add(nextElements[i]);
                 }
             }
-            else
-            {
-                //删除
-                LinkE temp = new LinkE(current, false);
-                while (temp.Pre != stack.Peek().Pre)
-                {
-                    temp = temp.Pre;
-                    GameObject.Destroy(temp.go);
-                }
-            }
+          
 
         }
 
@@ -123,26 +118,35 @@ class AStar: PathFind
         }
     }
 
-    //按F从大到小排列
+    //获取节点周围可行动的点
     protected List<LinkE> GetNextElements(LinkE s)
     {
         List<LinkE> list = new List<LinkE>();
+        LinkE e;
         if (s.R - 1 >= 0 && Map[s.R - 1, s.C])
         {
-            list.Add(new LinkE(s.R - 1, s.C));
+            e = new LinkE(s.R - 1, s.C);
+            e.F = GetF(e);
+            list.Add(e);
         }
         if (s.C + 1 <= MapC - 1 && Map[s.R, s.C + 1])
         {
-            list.Add(new LinkE(s.R, s.C + 1));
+            e = new LinkE(s.R, s.C + 1);
+            e.F = GetF(e);
+            list.Add(e);
         }
         if (s.R + 1 <= MapR - 1 && Map[s.R + 1, s.C])
         {
-            list.Add(new LinkE(s.R + 1, s.C));
+            e =new LinkE(s.R + 1, s.C);
+            e.F = GetF(e);
+            list.Add(e);
 
         }
         if (s.C - 1 >= 0 && Map[s.R, s.C - 1])
         {
-            list.Add(new LinkE(s.R, s.C - 1));
+            e = new LinkE(s.R, s.C - 1);
+            e.F = GetF(e);
+            list.Add(e);
         }
 
         return list;

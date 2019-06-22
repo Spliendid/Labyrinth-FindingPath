@@ -20,6 +20,12 @@ public class LinkE : IComparable<LinkE>
         this.R = r;
         this.C = c;
     }
+    public LinkE(int r, int c,float f)
+    {
+        this.R = r;
+        this.C = c;
+        this.F = f;
+    }
 
 
     public LinkE(LinkE e, bool isNext = true)
@@ -101,12 +107,12 @@ public class MinHeap<T> where T : IComparable<T>
 
     private int GetLeftChild(int index)
     {
-        return 2 * index;
+        return 2 * index+1;
     }
 
     private int GetRightChild(int index)
     {
-        return 2 * index+1;
+        return 2 * index+2;
     }
 
     private void ShiftUp(int index)
@@ -123,7 +129,7 @@ public class MinHeap<T> where T : IComparable<T>
         while (GetLeftChild(index)<list.Count)
         {
             int j = GetLeftChild(index);
-
+             
             //获取最小的子节点
             if (j+1<list.Count)
             {
